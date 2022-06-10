@@ -81,5 +81,5 @@ when isMainModule:
 when not isMainModule:
     if "Windows" in getOsName():
         let regi = execCmdEx("reg query HKCU\Console /v VirtualTerminalLevel")[0]
-        if not "0x1" in regi:
+        if not ("0x1" in regi):
             discard os.execShellCmd("reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 00000001")
