@@ -125,7 +125,7 @@ proc main() =
 
             let gray = (pixelR.float * 0.299 + pixelG.float * 0.587 + pixelB.float * 0.114).int
 
-            line &= tlib.rgb(pixelR, pixelG, pixelB) & chars[gray.int div threshold]
+            line &= tlib.rgb(pixelR, pixelG, pixelB) & tlib.rgb_bg(pixelR, pixelG, pixelB) & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
         
         result_file &= lineNoColor & "\n"

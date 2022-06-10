@@ -8,6 +8,10 @@ proc rgb*(r:Natural, g:Natural, b:Natural): string=
     ## Return RGB escape sequance
     result = &"\e[38;2;{r};{g};{b}m"
 
+proc rgb_bg*(r:Natural, g:Natural, b:Natural): string=
+    ## Return RGB escape sequance
+    result = &"\e[48;2;{r};{g};{b}m"
+
 proc read*(args: string): string =
     ## Same as INPUT in python
     stdout.write(args)
@@ -77,5 +81,5 @@ when isMainModule:
 when not isMainModule:
     if "Windows" in getOsName():
         let regi = execCmdEx("reg query HKCU\Console /v VirtualTerminalLevel")[0]
-        if "0x1" in regi:
+        if not "0x1" in regi:
             discard os.execShellCmd("reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 00000001")
