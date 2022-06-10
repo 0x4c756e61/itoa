@@ -24,6 +24,7 @@ var
     img_path = ""
     output_path = ""
     threshold = 25
+    do_output = true
     width = 0
     chars = chars_short
     result_file = ""
@@ -89,8 +90,10 @@ proc proccessArgs() =
                         chars = chars_long_reversed
                     else:
                         error &"Unknow charaters list: {paramStr(i+1)}"
-                
             
+            of "-q", "--quiet":
+                do_output = false
+
             of "-o", "--output":
                 discard_next = true
                 if paramCount() < i+1: error "Missing argument OUPUT_PATH"
@@ -138,7 +141,7 @@ when isMainModule:
     if img_path == "": error "No image provided"
     if not os.fileExists(img_path): error "File not found"
     main()
-    echo colored_result
+    if do_output: echo colored_result
 
     if output_path != "":
         writeFile(output_path, result_file)
