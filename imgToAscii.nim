@@ -61,8 +61,9 @@ proc proccessArgs() =
                 register_help(["-h", "--help"], "Show this page and quits")
                 register_help(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
                 register_help(["-w", "--width"], "Set the new width of image            Default: image_size/2")
-                register_help(["-c", "--characters"], "Charset                               Default: Short Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
+                register_help(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
                 register_help(["-o", "--output"], "Output file")
+                register_help(["-q", "--quiet"], "Do not print to the console")
                 echo help_menu
                 quit(0)
             
