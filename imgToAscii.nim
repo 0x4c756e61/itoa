@@ -2,7 +2,7 @@ import pixie, tlib, strformat, strutils, os
 
 const
     red = tlib.rgb(255,33,81)
-    # green = tlib.rgb(37,255,100)
+    green = tlib.rgb(37,255,100)
     # yellow = tlib.rgb(246,255,69)
     blue = tlib.rgb(105,74,255)
     dft = def()
@@ -50,6 +50,19 @@ proc register_help(calls: array[0..1,string], desc:string) =
     let thing = &"\n    {blue}{options}{dft}"
     let space = " " * (50-len(thing))
     help_menu &= thing & space & desc
+
+proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
+    let 
+        percent = (prog/total * 100 / 2).int
+        percent_r = (prog/total*100).int
+
+    if percent_r == 100:
+        stdout.writeLine(text & "[" & &"{green}{char_completed}{def()}" * 50 & "] " & &"{green}Done{def()}")
+        moveCursorUp 1
+        
+    else:
+        stdout.writeLine(text & "[" & &"{rgb(100, 2*percent_r, 0)}{char_completed}{def()}" * percent & char_not_completed * (50-percent) & "] " & $(percent_r) & "%")
+        moveCursorUp 1
 
 proc proccessArgs() =
     var discard_next = false
@@ -110,10 +123,13 @@ proc main() =
     
     if width == 0: width = original_image.width div 4
     let downscaled_img = original_image.resize(width, ((original_image.height / original_image.width) * width.float * 0.5).int)
+    var progress = 0
 
     let
         imgH = downscaled_img.height
         imgW = downscaled_img.width
+
+    hidecursor()
 
     for y in 0..imgH:
         var 
@@ -131,10 +147,14 @@ proc main() =
 
             line &= tlib.rgb(pixelR, pixelG, pixelB) & tlib.rgb_bg(pixelR, pixelG, pixelB) & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
+            drawBar(progress, downscaled_img.data.len(), "Completion", "#", "-")
+            progress.inc()
+            # echo "Progress: " & $((progress / downscaled_img.data.len())*100)
         
         result_file &= lineNoColor & "\n"
         colored_result &= line & "\n"
 
+    showcursor()
 when isMainModule:
     setControlCHook(exit)
     echo banner
