@@ -51,18 +51,19 @@ proc register_help(calls: array[0..1,string], desc:string) =
     let space = " " * (50-len(thing))
     help_menu &= thing & space & desc
 
-proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
-    let 
-        percent = (prog/total * 100 / 2).int
-        percent_r = (prog/total*100).int
+when (not defined(windows)):
+    proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
+        let 
+            percent = (prog/total * 100 / 2).int
+            percent_r = (prog/total*100).int
 
-    if percent_r == 100:
-        stdout.writeLine(text & "[" & &"{green}{char_completed}{def()}" * 50 & "] " & &"{green}Done{def()}")
-        moveCursorUp 1
-        
-    else:
-        stdout.writeLine(text & "[" & &"{rgb(100, 2*percent_r, 0)}{char_completed}{def()}" * percent & char_not_completed * (50-percent) & "] " & $(percent_r) & "%")
-        moveCursorUp 1
+        if percent_r == 100:
+            stdout.writeLine(text & "[" & &"{green}{char_completed}{def()}" * 50 & "] " & &"{green}Done{def()}")
+            moveCursorUp 1
+            
+        else:
+            stdout.writeLine(text & "[" & &"{rgb(100, 2*percent_r, 0)}{char_completed}{def()}" * percent & char_not_completed * (50-percent) & "] " & $(percent_r) & "%")
+            moveCursorUp 1
 
 proc proccessArgs() =
     var discard_next = false
@@ -147,8 +148,9 @@ proc main() =
 
             line &= tlib.rgb(pixelR, pixelG, pixelB) & tlib.rgb_bg(pixelR, pixelG, pixelB) & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
-            drawBar(progress, downscaled_img.data.len(), "Completion", "#", "-")
-            progress.inc()
+            when (not defined(windows)):
+                drawBar(progress, downscaled_img.data.len(), "Completion", "#", "-")
+                progress.inc()
             # echo "Progress: " & $((progress / downscaled_img.data.len())*100)
         
         result_file &= lineNoColor & "\n"
