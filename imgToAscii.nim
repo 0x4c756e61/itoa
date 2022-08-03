@@ -11,22 +11,15 @@ const
     chars_short = "@%$#+=;:,. "
     chars_short_reversed = " .,:;+#$%@"
 
-const banner = &"""
-{red}    __________{blue} ____  ___ 
-{red}   /  _/_  __/{blue}/ __ \/   |
-{red}   / /  / /  {blue}/ / / / /| |
-{red} _/ /  / /  {blue}/ /_/ / ___ |
-{red}/___/ /_/   {blue}\____/_/  |_|
-    {red}Image {blue}to Ascii{dft}
-    """
-
 var
     img_path = ""
     output_path = ""
     threshold = 25
     do_output = true
+    do_save = false
     width = 0
     chars = chars_short
+    background = false
     result_file = ""
     colored_result = ""
     help_menu = &"""
@@ -51,11 +44,12 @@ proc register_help(calls: array[0..1,string], desc:string) =
     let space = " " * (50-len(thing))
     help_menu &= thing & space & desc
 
+
 when (not defined(windows)):
     proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
         let 
             percent = (prog/total * 100 / 2).int
-            percent_r = (prog/total*100).int
+            percent_r = ((prog/total*100).int).clamp(0,100)
 
         if percent_r == 100:
             stdout.writeLine(text & "[" & &"{green}{char_completed}{def()}" * 50 & "] " & &"{green}Done{def()}")
@@ -76,6 +70,7 @@ proc proccessArgs() =
                 register_help(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
                 register_help(["-w", "--width"], "Set the new width of image            Default: image_size/2")
                 register_help(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
+                register_help(["-b", "--background"], "Colors the background")
                 register_help(["-o", "--output"], "Output file")
                 register_help(["-q", "--quiet"], "Do not print to the console")
                 echo help_menu
@@ -108,13 +103,16 @@ proc proccessArgs() =
             
             of "-q", "--quiet":
                 do_output = false
+            
+            of "-b", "--background":
+                background = true
 
             of "-o", "--output":
                 discard_next = true
+                do_save = true
                 if paramCount() < i+1: error "Missing argument OUPUT_PATH"
                 output_path = os.paramStr(i+1)
-            
-                        
+        
             else:
                 img_path = arg
 
@@ -144,14 +142,20 @@ proc main() =
                 pixelB = downscaled_img[x,y].b
                 # pixelA = downscaled_img[x,y].a
 
-            let gray = (pixelR.float * 0.299 + pixelG.float * 0.587 + pixelB.float * 0.114).int
+            let 
+                gray = (pixelR.float * 0.299 + pixelG.float * 0.587 + pixelB.float * 0.114).int
+                pixelFG = tlib.rgb(pixelR, pixelG, pixelB)
+            
+            var pixelBG:string
+            if background:
+                pixelBG = tlib.rgb_bg(pixelR, pixelG, pixelB)
 
-            line &= tlib.rgb(pixelR, pixelG, pixelB) & tlib.rgb_bg(pixelR, pixelG, pixelB) & chars[gray.int div threshold]
+            line &= pixelFG & pixelBG & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
             when (not defined(windows)):
                 drawBar(progress, downscaled_img.data.len(), "Completion", "#", "-")
                 progress.inc()
-            # echo "Progress: " & $((progress / downscaled_img.data.len())*100)
+            # echo "Progress: " & $(((progress / downscaled_img.data.len())*100)).int
         
         result_file &= lineNoColor & "\n"
         colored_result &= line & "\n"
@@ -159,12 +163,13 @@ proc main() =
     showcursor()
 when isMainModule:
     setControlCHook(exit)
-    echo banner
     proccessArgs()
     if img_path == "": error "No image provided"
     if not os.fileExists(img_path): error "File not found"
     main()
     if do_output: echo colored_result
 
-    if output_path != "":
-        writeFile(output_path, result_file)
+    if output_path == "":
+        output_path = img_path.split('.')[^2] & ".txt"
+    
+    if do_save: writeFile(output_path, result_file)
