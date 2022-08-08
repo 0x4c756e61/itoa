@@ -10,6 +10,14 @@ const
     chars_long_reversed = " .`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxunvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
     chars_short = "@%$#+=;:,. "
     chars_short_reversed = " .,:;+#$%@"
+    discord_colors = {(79.0,84.0,92.0):30,
+                      (220.0,50.0,47.0):31,
+                      (128.0,116.0,27.0):32,
+                      (181.0,137.0,0.0):33,
+                      (45.0,103.0,195.0):34,
+                      (166.0,54.0,130.0):35,
+                      (42.0,161.0,152.0):36,
+                      (255.0,255.0,255.0):37}
 
 var
     img_path = ""
@@ -21,6 +29,7 @@ var
     chars = chars_short
     background = false
     result_file = ""
+    discord = false
     colored_result = ""
     help_menu = &"""
 {red}imgTOAscii{dft} version {blue}0.0.1{dft}
@@ -35,6 +44,10 @@ proc error(str: string) =
     echo &"[{red}ERROR{dft}]   {str}"
     quit(1)
 
+proc info(str: string) =
+    echo &"[{blue}INFO{dft}]    {str}"
+    quit(1)
+
 proc exit() {.noconv.} =
     echo "\nThanks for using ITOA."
 
@@ -44,6 +57,13 @@ proc register_help(calls: array[0..1,string], desc:string) =
     let space = " " * (50-len(thing))
     help_menu &= thing & space & desc
 
+proc getDiscordColor(r,g,b:uint8): string =
+    var closest:float
+    result = "37"
+    for color in discord_colors:
+        let d = ((r.float - color[0][0])*0.299)**2.0 + ((g.float - color[0][1])*0.587)**2.0 + ((b.float - color[0][2])*0.114)**2.0
+        if d > closest:
+            result = $color[1]
 
 when (not defined(windows)):
     proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
@@ -69,6 +89,7 @@ proc proccessArgs() =
                 register_help(["-h", "--help"], "Show this page and quits")
                 register_help(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
                 register_help(["-w", "--width"], "Set the new width of image            Default: image_size/2")
+                register_help(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
                 register_help(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
                 register_help(["-b", "--background"], "Colors the background")
                 register_help(["-o", "--output"], "Output file")
@@ -106,6 +127,9 @@ proc proccessArgs() =
             
             of "-b", "--background":
                 background = true
+            
+            of "-d", "--discord":
+                discord = true
 
             of "-o", "--output":
                 discard_next = true
@@ -144,11 +168,20 @@ proc main() =
 
             let 
                 gray = (pixelR.float * 0.299 + pixelG.float * 0.587 + pixelB.float * 0.114).int
-                pixelFG = tlib.rgb(pixelR, pixelG, pixelB)
-            
-            var pixelBG:string
+                
+            var 
+                pixelBG:string
+                pixelFG:string = tlib.rgb(pixelR, pixelG, pixelB)
+
             if background:
                 pixelBG = tlib.rgb_bg(pixelR, pixelG, pixelB)
+            
+            if discord:
+                let c = getDiscordColor(pixelR ,pixelG ,pixelB)
+                if c != "0":
+                    pixelFG = "[0;" & c & "m"
+                else:
+                    pixelFG = ""
 
             line &= pixelFG & pixelBG & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
@@ -172,4 +205,10 @@ when isMainModule:
     if output_path == "":
         output_path = img_path.split('.')[^2] & ".txt"
     
-    if do_save: writeFile(output_path, result_file)
+    if discord and do_save:
+        writeFile(output_path & ".ansi", colored_result)
+        info &"File saved as '{output_path}.ansi'"
+    elif do_save: 
+        writeFile(output_path, result_file)
+        info &"File saved as '{output_path}'"
+    
