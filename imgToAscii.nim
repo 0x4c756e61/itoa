@@ -62,6 +62,7 @@ proc getDiscordColor(r,g,b:uint8): string =
     result = "37"
     for color in discord_colors:
         let d = ((r.float - color[0][0])*0.299)**2.0 + ((g.float - color[0][1])*0.587)**2.0 + ((b.float - color[0][2])*0.114)**2.0
+        #let d = (r.float - color[0][0])**2.0 + (g.float - color[0][1])**2.0 + (b.float - color[0][2])**2.0
         if d > closest:
             result = $color[1]
 

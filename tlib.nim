@@ -2,7 +2,7 @@
  `TLIB`, my custom terminal library
 ]##
 
-import strformat, os, sysinfo, strutils, osproc
+import strformat, os, osproc, strutils
 
 proc rgb*(r:Natural, g:Natural, b:Natural): string=
     ## Return RGB escape sequance
@@ -55,7 +55,7 @@ proc bold*():string =
 proc clear*()=
     ## Clear the screen using system commands
     var cmd: string
-    if "Windows" in getOsName():
+    when defined(windows):
         cmd = "cls"
     else:
         cmd = "clear"
@@ -102,8 +102,7 @@ when isMainModule:
     echo "This can't be used by itself"
     quit(1)
 
-when not isMainModule:
-    if "Windows" in getOsName():
-        let regi = execCmdEx("reg query HKCU\Console /v VirtualTerminalLevel")[0]
-        if not ("0x1" in regi):
-            discard os.execShellCmd("reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 00000001")
+when (not isMainModule) and defined(windows):
+    let regi = execCmdEx("reg query HKCU\Console /v VirtualTerminalLevel")[0]
+    if not ("0x1" in regi):
+        discard os.execShellCmd("reg add HKCU\Console /v VirtualTerminalLevel /t REG_DWORD /d 00000001")
