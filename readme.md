@@ -2,7 +2,7 @@
 
 ## Image TO Ascii
 
-### Note: windows problem seems to fixed (runs under wine)
+### Note: windows problem seems to be fixed (it runs under wine)
 
 ### Description
 
@@ -14,10 +14,10 @@ Providing the `--discord` flag itoa will convert any pixel color to the closest 
 Results will be printed in the terminal (unless you use the `--quiet` flag)
 To see the results in discord, just upload the file ending in `.ansi`
 <br>
-It has some issues tho:
- - Discord only provides 8 colors (so expect some weird results)
+It has some issues though:
+ - Discord only provides 8 colors (so expect weird results)
  - Can only be sent as files (Due to the 2k characters limit)
- - May freeze your discord client
+ - May freeze your discord client (rendering som much characters, including the escape sequences, is hard and so may freeze your client)
 
 
 ### Compiling
