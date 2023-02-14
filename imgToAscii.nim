@@ -30,6 +30,7 @@ var
     background = false
     result_file = ""
     discord = false
+    save_colors = false
     colored_result = ""
     help_menu = &"""
 {red}imgTOAscii{dft} version {blue}0.0.1{dft}
@@ -94,6 +95,7 @@ proc proccessArgs() =
                 register_help(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
                 register_help(["-b", "--background"], "Colors the background")
                 register_help(["-o", "--output"], "Output file")
+                register_help(["-s", "--save-colors"], "Writes the colored output to the file")
                 register_help(["-q", "--quiet"], "Do not print to the console")
                 echo help_menu
                 quit(0)
@@ -131,6 +133,9 @@ proc proccessArgs() =
             
             of "-d", "--discord":
                 discord = true
+            
+            of "-s", "--save-colors":
+                save_colors = true
 
             of "-o", "--output":
                 discard_next = true
@@ -203,13 +208,20 @@ when isMainModule:
     main()
     if do_output: echo colored_result
 
+    var outputData = result_file
+    if save_colors:
+        outputData = colored_result
+
     if output_path == "":
         output_path = img_path.split('.')[^2] & ".txt"
     
     if discord and do_save:
-        writeFile(output_path & ".ansi", colored_result)
+        writeFile(output_path & ".ansi", outputData)
+        echo "\n"
         info &"File saved as '{output_path}.ansi'"
+
     elif do_save: 
-        writeFile(output_path, result_file)
+        writeFile(output_path, outputData)
+        echo "\n"
         info &"File saved as '{output_path}'"
     
