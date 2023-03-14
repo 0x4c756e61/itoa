@@ -19,6 +19,9 @@ const
                       (42.0,161.0,152.0):36,
                       (255.0,255.0,255.0):37}
 
+proc dummy_bg(r,g,b:uint8):string = ""
+proc dummy_discord(r,g,b:uint8):string = tlib.rgb(r, g, b)
+
 var
     img_path = ""
     output_path = ""
@@ -27,11 +30,12 @@ var
     do_save = false
     width = 0
     chars = chars_short
-    background = false
     result_file = ""
     discord = false
+    discord_function:proc (r,g,b:uint8):string = dummy_discord
     save_colors = false
     colored_result = ""
+    background_function:proc (r,g,b:uint8):string = dummy_bg
     help_menu = &"""
 {red}imgTOAscii{dft} version {blue}0.0.1{dft}
 {red}imgTOAscii{dft} is a tool to convert images to {blue}ASCII{dft}.
@@ -66,6 +70,15 @@ proc getDiscordColor(r,g,b:uint8): string =
         #let d = (r.float - color[0][0])**2.0 + (g.float - color[0][1])**2.0 + (b.float - color[0][2])**2.0
         if d > closest:
             result = $color[1]
+
+
+proc background_coloring(r,g,b:uint8): string = tlib.rgb_bg(r, g, b)
+proc discord_coloring(r,g,b:uint8): string = 
+    let c = getDiscordColor(r ,g ,b)
+    if c != "0":
+        return "[0;" & c & "m"
+    else:
+        return ""
 
 when (not defined(windows)):
     proc drawBar(prog:int, total:int, text:string = "", char_completed:string = "#", char_not_completed:string="-") =
@@ -129,10 +142,10 @@ proc proccessArgs() =
                 do_output = false
             
             of "-b", "--background":
-                background = true
+                background_function = background_coloring
             
             of "-d", "--discord":
-                discord = true
+                discord_function = discord_coloring
             
             of "-s", "--save-colors":
                 save_colors = true
@@ -177,17 +190,10 @@ proc main() =
                 
             var 
                 pixelBG:string
-                pixelFG:string = tlib.rgb(pixelR, pixelG, pixelB)
+                pixelFG:string
 
-            if background:
-                pixelBG = tlib.rgb_bg(pixelR, pixelG, pixelB)
-            
-            if discord:
-                let c = getDiscordColor(pixelR ,pixelG ,pixelB)
-                if c != "0":
-                    pixelFG = "[0;" & c & "m"
-                else:
-                    pixelFG = ""
+            pixelBG = background_function(pixelR, pixelG, pixelB)
+            pixelFG = discord_function(pixelR, pixelG, pixelB)
 
             line &= pixelFG & pixelBG & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
