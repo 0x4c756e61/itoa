@@ -1,8 +1,8 @@
-import pixie, tlib, strformat, strutils, os
+import pixie, tlib, strformat, strutils, os, suru
 
 const
     red = tlib.rgb(255, 33, 81)
-    green = tlib.rgb(37, 255, 100)
+    # green = tlib.rgb(37, 255, 100)
     # yellow = tlib.rgb(246,255,69)
     blue = tlib.rgb(105, 74, 255)
     dft = def()
@@ -81,25 +81,6 @@ proc discord_coloring(r, g, b: uint8): string =
     else:
         return ""
 
-when (not defined(windows)):
-    proc drawBar(prog: int, total: int, text: string = "",
-            char_completed: string = "#", char_not_completed: string = "-") =
-        let
-            percent = (prog/total * 100 / 2).int
-            percent_r = ((prog/total*100).int).clamp(0, 100)
-
-        if percent_r == 100:
-            stdout.writeLine(text & "[" & &"{green}{char_completed}{def()}" *
-                    50 & "] " & &"{green}Done{def()}")
-            moveCursorUp 1
-
-        else:
-            stdout.writeLine(text & "[" &
-                    &"{rgb(100, 2*percent_r, 0)}{char_completed}{def()}" *
-                    percent & char_not_completed * (50-percent) & "] " & $(
-                    percent_r) & "%")
-            moveCursorUp 1
-
 proc proccessArgs() =
     var discard_next = false
     for i in 1..os.paramCount():
@@ -172,13 +153,16 @@ proc main() =
     if width == 0: width = original_image.width div 4
     let downscaled_img = original_image.resize(width, ((original_image.height /
             original_image.width) * width.float * 0.5).int)
-    var progress = 0
+
+    var sb: SuruBar = initSuruBar()
 
     let
         imgH = downscaled_img.height
         imgW = downscaled_img.width
 
-    hidecursor()
+    let totalProgress = imgH*imgW
+    sb[0].total = totalProgress
+    sb.setup()
 
     for y in 0..imgH:
         var
@@ -205,15 +189,12 @@ proc main() =
 
             line &= pixelFG & pixelBG & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
-            when (not defined(windows)):
-                drawBar(progress, downscaled_img.data.len(), "Completion", "#", "-")
-                progress.inc()
-            # echo "Progress: " & $(((progress / downscaled_img.data.len())*100)).int
+            sb[0].inc()
+            sb.update(50_000_000)
 
         result_file &= lineNoColor & "\n"
         colored_result &= line & "\n"
 
-    showcursor()
 when isMainModule:
     setControlCHook(exit)
     proccessArgs()
