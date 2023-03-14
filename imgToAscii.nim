@@ -68,7 +68,7 @@ proc getDiscordColor(r, g, b: uint8): string =
     for color in discord_colors:
         let d = ((r.float - color[0][0])*0.299)**2.0 + ((g.float - color[0][
                 1])*0.587)**2.0 + ((b.float - color[0][2])*0.114)**2.0
-        #let d = (r.float - color[0][0])**2.0 + (g.float - color[0][1])**2.0 + (b.float - color[0][2])**2.0
+
         if d > closest:
             result = $color[1]
 
@@ -150,7 +150,9 @@ proc main() =
     let
         original_image = readImage(img_path)
 
-    if width == 0: width = original_image.width div 4
+    if width == 0:
+        width = original_image.width div 4
+        
     let downscaled_img = original_image.resize(width, ((original_image.height /
             original_image.width) * width.float * 0.5).int)
 
