@@ -17,19 +17,13 @@ To see the results in discord, just upload the file ending in `.ansi`
 It has some issues though:
  - Discord only provides 8 colors (so expect weird results)
  - Can only be sent as files (Due to the 2k characters limit)
- - May freeze your discord client (rendering som much characters, including the escape sequences, is hard and so may freeze your client)
+ - May freeze your discord client (rendering so much characters, including the escape sequences, is hard, and so may freeze your client)
 
 
 ### Compiling
 #### Requirements
 - Any recent Nim version
-#### Linux
-Open a terminal window inside of the project's directory and run
-`nim -d:pixieUseStb -d:release -d:danger -d:strip --opt:size c imgToAscii.nim`
-\
-You can now run `./imgToAscii`
-
-#### Windows
-Open cmd, powershell or MS terminal in the project's folder and run `nim -d:mingw -d:release -d:danger -d:strip --opt:size c imgToAscii.nim`
-\
-You can now run `imgToAscii`
+#### Steps
+1. Open a terminal/cmd/powershell window inside the project folder
+2. Build a release binary with `nim release imgToAscii.nim`
+3. Done
