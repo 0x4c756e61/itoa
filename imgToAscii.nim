@@ -1,79 +1,35 @@
-import pixie, tlib, strformat, strutils, os, suru
+import pixie, strformat, strutils, os, suru
+import utilities/[tlib, macros]
 
-const
-    red = tlib.rgb(255, 33, 81)
-    # green = tlib.rgb(37, 255, 100)
-    # yellow = tlib.rgb(246,255,69)
-    blue = tlib.rgb(105, 74, 255)
-    dft = def()
-    chars_long = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~i!lI;:,\"^`. "
-    chars_long_reversed = " .`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxunvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
-    chars_short = "@%$#+=;:,. "
-    chars_short_reversed = " .,:;+#$%@"
-    discord_colors = {(79.0, 84.0, 92.0): 30,
-                      (220.0, 50.0, 47.0): 31,
-                      (128.0, 116.0, 27.0): 32,
-                      (181.0, 137.0, 0.0): 33,
-                      (45.0, 103.0, 195.0): 34,
-                      (166.0, 54.0, 130.0): 35,
-                      (42.0, 161.0, 152.0): 36,
-                      (255.0, 255.0, 255.0): 37}
+importDir("./utils")
 
+# Dummy function used as default functions for the foreground and background coloring
 proc dummy_bg(r, g, b: uint8): string = ""
-proc dummy_discord(r, g, b: uint8): string = tlib.rgb(r, g, b)
+proc dummy_fg(r, g, b: uint8): string = tlib.rgb(r, g, b)
 
+# CLI options with their default values
 var
+    threshold = 25
+    width = 0
+    
+    chars = chars_short
+    colored_result = ""
     img_path = ""
     output_path = ""
-    threshold = 25
+    result_file = ""
+    
+    discord = false
     do_output = true
     do_save = false
-    width = 0
-    chars = chars_short
-    result_file = ""
-    discord = false
-    discord_function: proc (r, g, b: uint8): string = dummy_discord
     save_colors = false
-    colored_result = ""
+    
+    # procedure aliases
     background_function: proc (r, g, b: uint8): string = dummy_bg
-    help_menu = &"""
-{red}imgTOAscii{dft} version {blue}0.0.1{dft}
-{red}imgTOAscii{dft} is a tool to convert images to {blue}ASCII{dft}.
+    foreground_coloring: proc (r, g, b: uint8): string = dummy_fg
 
-{red}USAGE{dft}:
-    itoa [OPTIONS] FILE_PATH
-
-{red}OPTIONS{dft}:"""
-
-proc error(str: string) =
-    echo &"[{red}ERROR{dft}]   {str}"
-    quit(1)
-
-proc info(str: string) =
-    echo &"[{blue}INFO{dft}]    {str}"
-    quit(1)
-
-proc exit() {.noconv.} =
-    echo "\nThanks for using ITOA."
-
-proc register_help(calls: array[0..1, string], desc: string) =
-    let options = calls.join(", ")
-    let thing = &"\n    {blue}{options}{dft}"
-    let space = " " * (50-len(thing))
-    help_menu &= thing & space & desc
-
-proc getDiscordColor(r, g, b: uint8): string =
-    var closest: float
-    result = "37"
-    for color in discord_colors:
-        let d = ((r.float - color[0][0])*0.299)**2.0 + ((g.float - color[0][
-                1])*0.587)**2.0 + ((b.float - color[0][2])*0.114)**2.0
-
-        if d > closest:
-            result = $color[1]
-
-
-proc background_coloring(r, g, b: uint8): string = tlib.rgb_bg(r, g, b)
+# Colors background
+proc background_coloring(r, g, b: uint8): string = tlib.rgbBg(r, g, b)
+# Colors the foreground using discord colors
 proc discord_coloring(r, g, b: uint8): string =
     let c = getDiscordColor(r, g, b)
     if c != "0":
@@ -88,15 +44,15 @@ proc proccessArgs() =
         let arg = os.paramStr(i)
         case arg
             of "-h", "--help":
-                register_help(["-h", "--help"], "Show this page and quits")
-                register_help(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
-                register_help(["-w", "--width"], "Set the new width of image            Default: image_size/2")
-                register_help(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
-                register_help(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
-                register_help(["-b", "--background"], "Colors the background")
-                register_help(["-o", "--output"], "Output file")
-                register_help(["-s", "--save-colors"], "Writes the colored output to the file")
-                register_help(["-q", "--quiet"], "Do not print to the console")
+                registerHelp(["-h", "--help"], "Show this page and quits")
+                registerHelp(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
+                registerHelp(["-w", "--width"], "Set the new width of image            Default: image_size/2")
+                registerHelp(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
+                registerHelp(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
+                registerHelp(["-b", "--background"], "Colors the background")
+                registerHelp(["-o", "--output"], "Output file")
+                registerHelp(["-s", "--save-colors"], "Writes the colored output to the file")
+                registerHelp(["-q", "--quiet"], "Do not print to the console")
                 echo help_menu
                 quit(0)
 
@@ -132,7 +88,8 @@ proc proccessArgs() =
                 background_function = background_coloring
 
             of "-d", "--discord":
-                discord_function = discord_coloring
+                discord = true
+                foreground_coloring = discord_coloring
 
             of "-s", "--save-colors":
                 save_colors = true
@@ -146,7 +103,7 @@ proc proccessArgs() =
             else:
                 img_path = arg
 
-proc main() =
+proc asciify() =
     let
         original_image = readImage(img_path)
 
@@ -187,7 +144,7 @@ proc main() =
                 pixelFG: string
 
             pixelBG = background_function(pixelR, pixelG, pixelB)
-            pixelFG = discord_function(pixelR, pixelG, pixelB)
+            pixelFG = foreground_coloring(pixelR, pixelG, pixelB)
 
             line &= pixelFG & pixelBG & chars[gray.int div threshold]
             lineNoColor &= chars[gray.int div threshold]
@@ -200,12 +157,16 @@ proc main() =
 when isMainModule:
     setControlCHook(exit)
     proccessArgs()
+
     if img_path == "": error "No image provided"
     if not os.fileExists(img_path): error "File not found"
-    main()
+
+    asciify()
+
     if do_output: echo colored_result
 
     var outputData = result_file
+    
     if save_colors:
         outputData = colored_result
 
@@ -221,4 +182,3 @@ when isMainModule:
         writeFile(output_path, outputData)
         echo "\n"
         info &"File saved as '{output_path}'"
-
