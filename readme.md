@@ -1,20 +1,43 @@
-# ITOA
-
 ## Image TO Ascii
+[![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.fr.html)
+[![language](https://img.shields.io/badge/Language-Nim-yellow)](https://nim-lang.org)
+![downloads](https://img.shields.io/github/downloads/0x454d505459/itoa/total?color=0effa7&label=Downloads)
 
-### Note: windows problem seems to be fixed (it runs under wine)
+---
+Convert your favourite images to **ascii**
 
-### Description
+### Supported image format
+- PNG
+- JPEG
+- BMP
+- QOI
+- GIF
+- SVG
+- PPM
 
-A rather simple tool to convert your favourite images to **ascii**
+### Features
+- [x] Show in terminal
+- [x] Progress bar (thanks to [suru](https://github.com/de-odex/suru))
+- [x] Multiple character sets
+- [x] Background coloring
+- [x] Discord ansi [color support](#discord-color-support)
+- [x] Change width
+- [x] Export to text file (with or without color)
+- [ ] Custom character sets
+- [ ] GPU Acceleration
+
+### Supported OSes
+- *NIX
+- Windows
 
 ### Discord color support
+Given the `--discord` flag, ITOA will try to convert every pixel to the closest color supported by discord's ascii renderer.<br>
+Resulting image will be printed out on the therminal (unless the `quiet` flag is given).<br>
+To see the results in discord, just upload the file ending in `.ansi`. (Discord won't render colors if the image is too big)
 
-Providing the `--discord` flag itoa will convert any pixel color to the closest discord one
-Results will be printed in the terminal (unless you use the `--quiet` flag)
-To see the results in discord, just upload the file ending in `.ansi`
 <br>
-It has some issues though:
+
+Discord color support is rudimental, and has some issues:
  - Discord only provides 8 colors (so expect weird results)
  - Can only be sent as files (Due to the 2k characters limit)
  - May freeze your discord client (rendering so much characters, including the escape sequences, is hard, and so may freeze your client)
