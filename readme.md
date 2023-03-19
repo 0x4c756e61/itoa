@@ -31,7 +31,7 @@ Convert your favourite images to **ascii**
 - Windows
 
 ### Discord color support
-Given the `--discord` flag, ITOA will try to convert every pixel to the closest color supported by discord's ascii renderer.<br>
+Given the `--discord` flag, ITOA will try to convert every pixel to the closest color supported by Discord's ansi highlighter.<br>
 Resulting image will be printed out on the therminal (unless the `quiet` flag is given).<br>
 To see the results in discord, just upload the file ending in `.ansi`. (Discord won't render colors if the image is too big)
 
