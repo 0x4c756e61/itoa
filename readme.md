@@ -50,3 +50,9 @@ Discord color support is rudimental, and has some issues:
 1. Open a terminal/cmd/powershell window inside the project folder
 2. Build a release binary with `nim release imgToAscii.nim`
 3. Done
+
+
+### Used libraries
+- [suru](https://github.com/de-odex/suru) for progress tracking
+- [pixie](https://github.com/treeform/pixie) for image processing
+- [utilities-nim](https://github.com/0x454d505459/utilities-nim) for character coloring and other stuff
