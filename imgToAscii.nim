@@ -33,9 +33,10 @@ proc background_coloring(r, g, b: uint8): string = tlib.rgbBg(r, g, b)
 proc discord_coloring(r, g, b: uint8): string =
     let c = getDiscordColor(r, g, b)
     if c != "0":
-        return "[0;" & c & "m"
+        result =  "[0;" & c & "m"
     else:
-        return ""
+        result =  ""
+
 
 proc proccessArgs() =
     var discard_next = false
