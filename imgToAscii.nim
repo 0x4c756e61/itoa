@@ -9,6 +9,7 @@ proc dummy_fg(r, g, b: uint8): string = tlib.rgb(r, g, b)
 
 # CLI options with their default values
 var
+    colorThreshold = 20.0
     threshold = 25
     width = 0
     
@@ -31,7 +32,7 @@ var
 proc background_coloring(r, g, b: uint8): string = tlib.rgbBg(r, g, b)
 # Colors the foreground using discord colors
 proc discord_coloring(r, g, b: uint8): string =
-    let c = getDiscordColor(r, g, b)
+    let c = getDiscordColor(r, g, b, colorThreshold)
     if c != "0":
         result =  "[0;" & c & "m"
     else:
@@ -46,7 +47,8 @@ proc proccessArgs() =
         case arg
             of "-h", "--help":
                 registerHelp(["-h", "--help"], "Show this page and quits")
-                registerHelp(["-t", "--threshold"], "The accuracy of the conversion        Default: 24")
+                registerHelp(["-t", "--color-threshold"], "Accuracy of the discord color conversion        Default: 25")
+                registerHelp(["-a", "--threshold"], "The accuracy of the conversion        Default: 25")
                 registerHelp(["-w", "--width"], "Set the new width of image            Default: image_size/2")
                 registerHelp(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
                 registerHelp(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
@@ -61,6 +63,11 @@ proc proccessArgs() =
                 discard_next = true
                 if paramCount() < i+1: error "Missing argument THRESHOLD"
                 threshold = parseInt(os.paramStr(i+1))
+            
+            of "-a", "--color-threshold":
+                discard_next = true
+                if paramCount() < i+1: error "Missing argument THRESHOLD"
+                colorThreshold = parseFloat(os.paramStr(i+1))
 
             of "-w", "--width":
                 discard_next = true

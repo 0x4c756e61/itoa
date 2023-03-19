@@ -18,11 +18,11 @@ const
 
 
 # get closest discord ansi color
-# TODO: Fix the discord coloring
-proc getDiscordColor*(r, g, b: uint8): string =
-    var closest: float = 7000.0
+# TODO: Find a better algorithm
+proc getDiscordColor*(r, g, b: uint8, colorTreshold:float): string =
+    var closest: float = colorTreshold # Arbitrary number for color threshold
     result = "37"
     for color in discord_colors:
-        let d = ((r.float - color[0][0])*0.299).pow(2.0) + ((g.float - color[0][1])*0.587).pow(2.0) + ((b.float - color[0][2])*0.114).pow(2.0)
-        if d < closest:
+        let d = ((r.float - color[0][0])*0.30).pow(2.0) + ((g.float - color[0][1])*0.59).pow(2.0) + ((b.float - color[0][2])*0.11).pow(2.0)
+        if sqrt(d) < closest:
             result = $color[1]
