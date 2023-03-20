@@ -47,11 +47,11 @@ proc proccessArgs() =
         case arg
             of "-h", "--help":
                 registerHelp(["-h", "--help"], "Show this page and quits")
-                registerHelp(["-t", "--color-threshold"], "Accuracy of the discord color conversion        Default: 25")
-                registerHelp(["-a", "--threshold"], "The accuracy of the conversion        Default: 25")
-                registerHelp(["-w", "--width"], "Set the new width of image            Default: image_size/2")
+                registerHelp(["-t", "--color-threshold"], "Accuracy of the discord color conversion         Default: 25")
+                registerHelp(["-a", "--threshold"], "The accuracy of the conversion                   Default: 25")
+                registerHelp(["-w", "--width"], "Set the new width of image                       Default: image_size/2")
                 registerHelp(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
-                registerHelp(["-c", "--characters"], "Charset                               Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
+                registerHelp(["-c", "--characters"], "Charset                                          Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
                 registerHelp(["-b", "--background"], "Colors the background")
                 registerHelp(["-o", "--output"], "Output file")
                 registerHelp(["-s", "--save-colors"], "Writes the colored output to the file")

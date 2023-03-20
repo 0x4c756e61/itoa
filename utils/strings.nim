@@ -11,7 +11,7 @@ const
 
 var
     helpMenu* = &"""
-{red}imgTOAscii{dft} version {blue}0.0.1{dft}
+{red}imgTOAscii{dft} version {blue}v0.04{dft}
 {red}imgTOAscii{dft} is a tool to convert images to {blue}ASCII{dft}.
 
 {red}USAGE{dft}:
