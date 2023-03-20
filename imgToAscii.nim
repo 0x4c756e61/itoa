@@ -52,6 +52,7 @@ proc proccessArgs() =
                 registerHelp(["-w", "--width"], "Set the new width of image                       Default: image_size/2")
                 registerHelp(["-d", "--discord"], "Changes the color set to discord's ansi escape sequences")
                 registerHelp(["-c", "--characters"], "Charset                                          Default: Chars Available: short/s, long/l, reversed_short/rs, reversed_long/rl")
+                registerHelp(["-cc", "--custom-charset"], "use following string as a character set")
                 registerHelp(["-b", "--background"], "Colors the background")
                 registerHelp(["-o", "--output"], "Output file")
                 registerHelp(["-s", "--save-colors"], "Writes the colored output to the file")
@@ -64,6 +65,12 @@ proc proccessArgs() =
                 if paramCount() < i+1: error "Missing argument THRESHOLD"
                 threshold = parseInt(os.paramStr(i+1))
             
+            of "-cc", "--custom-charset":
+                discard_next = true
+                if paramCount() < i+1: error "Missing argument CHARSET"      
+                chars = os.paramStr(i+1)
+                echo chars
+
             of "-a", "--color-threshold":
                 discard_next = true
                 if paramCount() < i+1: error "Missing argument THRESHOLD"
@@ -154,8 +161,8 @@ proc asciify() =
             pixelBG = background_function(pixelR, pixelG, pixelB)
             pixelFG = foreground_coloring(pixelR, pixelG, pixelB)
 
-            line &= pixelFG & pixelBG & chars[gray.int div threshold]
-            lineNoColor &= chars[gray.int div threshold]
+            line &= pixelFG & pixelBG & chars[(gray.int div threshold) mod len(chars)]
+            lineNoColor &= chars[(gray.int div threshold) mod len(chars)]
             sb[0].inc()
             sb.update(50_000_000)
 
