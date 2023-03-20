@@ -14,15 +14,15 @@ var
     width = 0
     
     chars = chars_short
-    colored_result = ""
-    img_path = ""
-    output_path = ""
-    result_file = ""
+    coloredResult = ""
+    imgPath = ""
+    outputPath = ""
+    resultFile = ""
     
     discord = false
-    do_output = true
-    do_save = false
-    save_colors = false
+    doOutput = true
+    doSave = false
+    saveColors = false
     
     # procedure aliases
     background_function: proc (r, g, b: uint8): string = dummy_bg
@@ -90,7 +90,7 @@ proc proccessArgs() =
                         error &"Unknow charaters list: {paramStr(i+1)}"
 
             of "-q", "--quiet":
-                do_output = false
+                doOutput = false
 
             of "-b", "--background":
                 background_function = background_coloring
@@ -100,20 +100,20 @@ proc proccessArgs() =
                 foreground_coloring = discord_coloring
 
             of "-s", "--save-colors":
-                save_colors = true
+                saveColors = true
 
             of "-o", "--output":
                 discard_next = true
-                do_save = true
+                doSave = true
                 if paramCount() < i+1: error "Missing argument OUPUT_PATH"
-                output_path = os.paramStr(i+1)
+                outputPath = os.paramStr(i+1)
 
             else:
-                img_path = arg
+                imgPath = arg
 
 proc asciify() =
     let
-        original_image = readImage(img_path)
+        original_image = readImage(imgPath)
 
     if width == 0:
         width = original_image.width div 4
@@ -159,34 +159,34 @@ proc asciify() =
             sb[0].inc()
             sb.update(50_000_000)
 
-        result_file &= lineNoColor & "\n"
-        colored_result &= line & "\n"
+        resultFile &= lineNoColor & "\n"
+        coloredResult &= line & "\n"
 
 when isMainModule:
     setControlCHook(exit)
     proccessArgs()
 
-    if img_path == "": error "No image provided"
-    if not os.fileExists(img_path): error "File not found"
+    if imgPath == "": error "No image provided"
+    if not os.fileExists(imgPath): error "File not found"
 
     asciify()
 
-    if do_output: echo colored_result
+    if doOutput: echo coloredResult
 
-    var outputData = result_file
+    var outputData = resultFile
     
-    if save_colors:
-        outputData = colored_result
+    if saveColors:
+        outputData = coloredResult
 
-    if output_path == "":
-        output_path = img_path.split('.')[^2] & ".txt"
+    if outputPath == "":
+        outputPath = imgPath.split('.')[^2] & ".txt"
 
-    if discord and do_save:
-        writeFile(output_path & ".ansi", outputData)
+    if discord and doSave:
+        writeFile(outputPath & ".ansi", outputData)
         echo "\n"
-        info &"File saved as '{output_path}.ansi'"
+        info &"File saved as '{outputPath}.ansi'"
 
-    elif do_save:
-        writeFile(output_path, outputData)
+    elif doSave:
+        writeFile(outputPath, outputData)
         echo "\n"
-        info &"File saved as '{output_path}'"
+        info &"File saved as '{outputPath}'"
