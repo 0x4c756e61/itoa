@@ -23,7 +23,7 @@ Convert your favourite images to **ascii**
 - [x] Discord ansi [color support](#discord-color-support)
 - [x] Change width
 - [x] Export to text file (with or without color)
-- [ ] Custom character sets
+- [x] Custom character sets
 - [ ] GPU Acceleration
 
 ### Supported OSes
